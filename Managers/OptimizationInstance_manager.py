@@ -3,8 +3,6 @@ import random
 from Entities.Student import Student
 from Entities.Optimization_Instance import OptimizationInstance
 
-
-
 class OptimizationInstanceManager:
     """Manager class to create instances of the optimization problem."""
 
@@ -24,6 +22,9 @@ class OptimizationInstanceManager:
         # Total available time for socket usage (e.g., operational hours in a day)
         T: float = random.uniform(5, 10)
 
+        # Total working hours
+        total_working_hours: float = random.uniform(12, 18)
+
         # Generate students with their respective rates and battery levels
         students: List[Student] = [
             Student(
@@ -33,4 +34,4 @@ class OptimizationInstanceManager:
             ) for _ in range(N)
         ]
 
-        return OptimizationInstance(students, s, T)
+        return OptimizationInstance(students, s, T, total_working_hours)
