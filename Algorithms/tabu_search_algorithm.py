@@ -1,8 +1,8 @@
 # Algorithms/tabu_search_algorithm.py
 import numpy as np
 from typing import List, Tuple
-from Entities.Optimization_Instance import OptimizationInstance
-from Managers.Satisfaction_manager import SatisfactionManager
+from Entities.optimization_instance import OptimizationInstance
+from Managers.satisfaction_manager import SatisfactionManager
 from Entities.optimization_algorithm import OptimizationAlgorithm
 
 class TabuSearch(OptimizationAlgorithm):

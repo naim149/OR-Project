@@ -1,7 +1,7 @@
 # Entities/optimization_algorithm.py
 from abc import ABC, abstractmethod
 from typing import List
-from Entities.Optimization_Instance import OptimizationInstance
+from Entities.optimization_instance import OptimizationInstance
 
 class OptimizationAlgorithm(ABC):
     @abstractmethod

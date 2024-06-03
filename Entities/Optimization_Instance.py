@@ -1,5 +1,5 @@
 from typing import List
-from Entities.Student import Student
+from Entities.student import Student
 
 class OptimizationInstance:
     """Class representing an instance of the optimization problem."""

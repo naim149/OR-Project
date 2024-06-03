@@ -1,8 +1,8 @@
 # optimization.py
-from Entities.Student import Student
-from Entities.Optimization_Instance import OptimizationInstance
-from Managers.OptimizationInstance_manager import OptimizationInstanceManager
-from Managers.Satisfaction_manager import SatisfactionManager
+from Entities.student import Student
+from Entities.optimization_instance import OptimizationInstance
+from Managers.optimizationInstance_manager import OptimizationInstanceManager
+from Managers.satisfaction_manager import SatisfactionManager
 from Algorithms.initial_guess_algorithm import ImprovedInitialGuessAlgorithm
 from Algorithms.simulated_annealing import SimulatedAnnealing
 from Algorithms.tabu_search_algorithm import TabuSearch

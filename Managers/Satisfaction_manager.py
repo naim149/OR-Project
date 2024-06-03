@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
-from Entities.Student import Student
-from Entities.Optimization_Instance import OptimizationInstance
+from Entities.student import Student
+from Entities.optimization_instance import OptimizationInstance
 
 class SatisfactionManager:
     """Stateless class to manage and calculate student satisfaction."""

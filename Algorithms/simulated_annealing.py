@@ -1,7 +1,7 @@
 import numpy as np
 from typing import List
-from Entities.Optimization_Instance import OptimizationInstance
-from Managers.Satisfaction_manager import SatisfactionManager
+from Entities.optimization_instance import OptimizationInstance
+from Managers.satisfaction_manager import SatisfactionManager
 from Entities.optimization_algorithm import OptimizationAlgorithm
 
 class SimulatedAnnealing(OptimizationAlgorithm):

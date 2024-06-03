@@ -1,7 +1,7 @@
 from typing import List
 import random
-from Entities.Student import Student
-from Entities.Optimization_Instance import OptimizationInstance
+from Entities.student import Student
+from Entities.optimization_instance import OptimizationInstance
 
 class OptimizationInstanceManager:
     """Manager class to create instances of the optimization problem."""

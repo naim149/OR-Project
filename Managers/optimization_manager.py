@@ -1,6 +1,6 @@
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
-from Entities.Optimization_Instance import OptimizationInstance
+from Entities.optimization_instance import OptimizationInstance
 from Entities.optimization_algorithm import OptimizationAlgorithm
 
 class OptimizationManager:

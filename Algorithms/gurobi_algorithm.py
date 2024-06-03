@@ -1,9 +1,9 @@
 import gurobipy as gp
 from gurobipy import GRB
 from typing import List
-from Entities.Student import Student
-from Entities.Optimization_Instance import OptimizationInstance
-from Managers.Satisfaction_manager import SatisfactionManager
+from Entities.student import Student
+from Entities.optimization_instance import OptimizationInstance
+from Managers.satisfaction_manager import SatisfactionManager
 import math
 
 class ImprovedGurobiOptimization:
