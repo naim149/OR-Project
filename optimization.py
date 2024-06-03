@@ -1,4 +1,5 @@
 # optimization.py
+import numpy as np
 from Entities.student import Student
 from Entities.optimization_instance import OptimizationInstance
 from Managers.optimizationInstance_manager import OptimizationInstanceManager
@@ -7,10 +8,11 @@ from Algorithms.initial_guess_algorithm import ImprovedInitialGuessAlgorithm
 from Algorithms.simulated_annealing import SimulatedAnnealing
 from Algorithms.tabu_search_algorithm import TabuSearch
 from Algorithms.gurobi_algorithm import ImprovedGurobiOptimization
+from Algorithms.gurobi_algorithm_notworking import GurobiAlgorithmNotWorking
 from Managers.optimization_manager import OptimizationManager
 
 def main():
-    instance_manager = OptimizationInstanceManager(seed=10)
+    instance_manager = OptimizationInstanceManager(seed=1)
     optimization_instance = instance_manager.create_instance()
 
     students = optimization_instance.students
@@ -28,7 +30,8 @@ def main():
         ImprovedInitialGuessAlgorithm(),
         SimulatedAnnealing(max_iterations=1000, initial_temp=100, cooling_rate=0.003),
         TabuSearch(max_iterations=500, tabu_tenure=5),
-        ImprovedGurobiOptimization()
+        ImprovedGurobiOptimization(),
+        GurobiAlgorithmNotWorking()
     ]
     manager = OptimizationManager(algorithms)
     results = manager.optimize(optimization_instance)
@@ -40,7 +43,8 @@ def main():
         else:
             toos_before_allocation = [SatisfactionManager.calculate_out_of_battery_time(student, 0, total_working_hours) for student in students]
             toos_after_allocation = [SatisfactionManager.calculate_out_of_battery_time(student, time, total_working_hours) for student, time in zip(students, result)]
-            total_satisfaction = SatisfactionManager.calculate_total_satisfaction(result, optimization_instance)
+            total_satisfaction_before = SatisfactionManager.calculate_total_satisfaction(np.array([0] * len(students)), optimization_instance)
+            total_satisfaction_after = SatisfactionManager.calculate_total_satisfaction(result, optimization_instance)
             total_out_of_service_hours = sum(toos_after_allocation)
 
             print(f"{'Student':<10}{'Ch-R':<10}{'Dis-R':<10}{'Init-Bat':<10}{'Alloc-Time':<12}{'TOoS-Before':<12}{'TOoS-After':<12}")
@@ -49,7 +53,8 @@ def main():
                 print(f"{i+1:<10}{student.recharge_rate:<10.2f}{student.discharge_rate:<10.2f}{student.initial_battery:<10.2f}{time:<12.2f}{toos_before:<12.2f}{toos_after:<12.2f}")
 
             print(f"\nSummary:")
-            print(f"Total Satisfaction: {total_satisfaction:.2f}")
+            print(f"Starting Satisfaction: {total_satisfaction_before:.2f}")
+            print(f"Final Satisfaction: {total_satisfaction_after:.2f}")
             print(f"Total Out of Service Hours: {total_out_of_service_hours:.2f} hours")
 
 if __name__ == "__main__":
