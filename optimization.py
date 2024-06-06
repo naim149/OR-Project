@@ -27,11 +27,11 @@ def main():
     print("\nOptimizing allocation...\n")
 
     algorithms = [
-        ImprovedInitialGuessAlgorithm(),
-        SimulatedAnnealing(max_iterations=1000, initial_temp=100, cooling_rate=0.003),
-        TabuSearch(max_iterations=500, tabu_tenure=5),
+        # ImprovedInitialGuessAlgorithm(),
+        # SimulatedAnnealing(max_iterations=1000, initial_temp=100, cooling_rate=0.003),
+        # TabuSearch(max_iterations=500, tabu_tenure=5),
         ImprovedGurobiOptimization(),
-        GurobiAlgorithmNotWorking()
+        # GurobiAlgorithmNotWorking()
     ]
     manager = OptimizationManager(algorithms)
     results = manager.optimize(optimization_instance)

@@ -21,9 +21,10 @@ class ImprovedGurobiOptimization:
             allocated_times = model.addVars(num_students, lb=0, ub=total_available_time, name="allocated_time")
 
             # Build the objective function using piecewise linear approximation for the log function
-            x_pts = np.linspace(0, total_available_time, 101)  # 101 points for piecewise linear approximation
             for i, s in enumerate(students):
                 y_pts = []
+                initial_outOfServiceTime = (s.initial_battery / 100.0) * total_available_time / s.discharge_rate
+                x_pts = np.linspace(0, initial_outOfServiceTime, 101)  # 101 points for piecewise linear approximation
                 for x in x_pts:
                     remaining_battery_time = (s.initial_battery / 100.0) * total_available_time / s.discharge_rate - x
                     time_out_of_service = max(0, total_working_hours - remaining_battery_time)
