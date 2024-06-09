@@ -1,0 +1,67 @@
+import gurobipy as gp
+from gurobipy import GRB
+import numpy as np
+
+# Parameters
+N = 5  # Total number of students
+s = 2  # Total number of electrical sockets
+T = 10  # Total available time slots
+delta_T = 1  # Time period for charging/discharging
+
+# Generate random data for rates and initial battery levels
+np.random.seed(0)
+r = np.random.uniform(5, 15, N)  # Recharge rates
+d = np.random.uniform(1, 5, N)  # Discharge rates
+b0 = np.random.uniform(20, 80, N)  # Initial battery levels
+
+# Create a new model
+m = gp.Model("laptop_charging")
+
+# Decision variables
+Y = m.addVars(N, T, vtype=GRB.BINARY, name="Y")  # Socket usage
+O = m.addVars(N, T, vtype=GRB.BINARY, name="O")  # Operational status
+B = m.addVars(N, T+1, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
+Z = m.addVars(N, name="Z")  # Operational time ratios
+
+# Initial battery levels
+for i in range(N):
+    m.addConstr(B[i, 0] == b0[i])
+
+# Battery dynamics and operational status
+for t in range(T):
+    for i in range(N):
+        m.addConstr(B[i, t+1] == B[i, t] + Y[i, t] * r[i] * delta_T - (1 - Y[i, t]) * d[i] * delta_T)
+        m.addConstr(O[i, t] <= B[i, t] / 100 + Y[i, t])
+        m.addConstr(O[i, t] <= 1)
+
+# Socket availability constraint
+for t in range(T):
+    m.addConstr(gp.quicksum(Y[i, t] for i in range(N)) <= s)
+
+# Time allocation constraint
+for i in range(N):
+    m.addConstr(gp.quicksum(Y[i, t] for t in range(T)) <= 1)
+
+# Compute Z_i for each student
+for i in range(N):
+    m.addConstr(Z[i] == gp.quicksum(O[i, t] * delta_T for t in range(T)) / T)
+
+# Compute sum of Z_i and sum of Z_i squared
+sum_Z = gp.quicksum(Z[i] for i in range(N))
+sum_Z_sq = gp.quicksum(Z[i] * Z[i] for i in range(N))
+
+# Set the objective to maximize the variance
+m.setObjective(sum_Z_sq - (sum_Z * sum_Z / N), GRB.MAXIMIZE)
+
+# Optimize the model
+m.optimize()
+
+# Print results
+if m.status == GRB.OPTIMAL:
+    for i in range(N):
+        print(f"Student {i}: Z_i = {Z[i].X}")
+        for t in range(T):
+            if Y[i, t].X > 0.5:
+                print(f"  Time slot {t}: Uses socket")
+else:
+    print("No optimal solution found.")
