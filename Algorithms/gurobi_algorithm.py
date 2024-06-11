@@ -42,7 +42,7 @@ class ImprovedGurobiOptimization:
         for t in range(num_time_slots):
             for i, student in enumerate(students):
                 model.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * student.recharge_rate * delta_t - (1 - Y[i, t]) * student.discharge_rate * delta_t)
-                model.addConstr(O[i, t] <= B[i, t] / 100 + Y[i, t])
+                model.addConstr(O[i, t] <= B[i, t] + Y[i, t])
                 model.addConstr(O[i, t] <= 1)
 
         # Socket availability constraint

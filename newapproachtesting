@@ -12,7 +12,7 @@ delta_T = 1  # Time period for charging/discharging
 np.random.seed(0)
 r = np.random.randint(5, 15, N)  # Recharge rates
 d = np.random.randint(1, 5, N)  # Discharge rates
-b0 = np.random.randint(0, 10, N)  # Initial battery levels
+b0 = np.random.uniform(0, 0.001, N)  # Initial battery levels
 
 # Create a new model
 m = gp.Model("laptop_charging")
@@ -21,7 +21,8 @@ m = gp.Model("laptop_charging")
 Y = m.addVars(N, T, vtype=GRB.BINARY, name="Y")  # Socket usage
 O = m.addVars(N, T, vtype=GRB.BINARY, name="O")  # Operational status
 B = m.addVars(N, T+1, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
-Z = m.addVars(N, name="Z")  # Operational time ratios
+Z = m.addVars(N, vtype=GRB.CONTINUOUS, name="Z")  # Operational time ratios
+
 
 # Initial battery levels
 for i in range(N):
@@ -39,9 +40,7 @@ for t in range(T):
 for t in range(T):
     m.addConstr(gp.quicksum(Y[i, t] for i in range(N)) <= s)
 
-# # Time allocation constraint
-# for i in range(N):
-#     m.addConstr(gp.quicksum(Y[i, t] for t in range(T)) <= 1)
+
 
 # Compute Z_i for each student
 for i in range(N):
@@ -52,26 +51,34 @@ sum_Z = gp.quicksum(Z[i] for i in range(N))
 sum_Z_sq = gp.quicksum(Z[i] * Z[i] for i in range(N))
 
 # Set the objective to maximize the variance
-m.setObjective(sum_Z_sq - (sum_Z * sum_Z / N), GRB.MAXIMIZE)
+m.setObjective(sum_Z, GRB.MAXIMIZE)
 
 # Optimize the model
 m.optimize()
 
 # Print results
-if m.status == GRB.OPTIMAL:
-    # Print the matrix B (battery levels)
-    print("Matrix B (Battery Levels):")
-    for i in range(N):
-        print(f"Student {i}:", [int(B[i, t].X) for t in range(T+1)])
-
-    # Print the matrix Y (socket usage)
-    print("\nMatrix Y (Socket Usage):")
-    for i in range(N):
-        print(f"Student {i}:", [int(Y[i, t].X) for t in range(T)])
-    
-    # Print the operational time ratios
-    print("\nOperational Time Ratios (Z):")
-    for i in range(N):
-        print(f"Student {i}: Z_i = {Z[i].X}")
+# If the model is infeasible, compute the IIS
+if m.status == GRB.INFEASIBLE:
+    print("The model is infeasible; computing IIS...")
+    m.computeIIS()
+    m.write("model.ilp")
+    print("IIS written to file 'model.ilp'")
 else:
-    print("No optimal solution found.")
+    # Print results if the model is feasible
+    if m.status == GRB.OPTIMAL:
+        # Print the matrix B (battery levels)
+        print("Matrix B (Battery Levels):")
+        for i in range(N):
+            print(f"Student {i}:", [B[i, t].X for t in range(T + 1)])
+
+        # Print the matrix Y (socket usage)
+        print("\nMatrix Y (Socket Usage):")
+        for i in range(N):
+            print(f"Student {i}:", [Y[i, t].X for t in range(T)])
+
+        # Print the operational time ratios
+        print("\nOperational Time Ratios (Z):")
+        for i in range(N):
+            print(f"Student {i}: Z_i = {Z[i].X}")
+    else:
+        print("No optimal solution found.")

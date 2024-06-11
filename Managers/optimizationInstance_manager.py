@@ -14,19 +14,19 @@ class OptimizationInstanceManager:
     def create_instance() -> OptimizationInstance:
         """Create and return an instance of the optimization problem."""
         # Number of students
-        N: int = random.randint(2, 5)
+        N: int = random.randint(2, 25)
 
         # Number of sockets, significantly less than N
-        s: int = random.randint(1, N // 2)
+        s: int = random.randint(1, N // 4)
 
         # Total available time for socket usage (e.g., operational hours in a day)
-        total_time: int = random.randint(2, 4)
+        total_time: int = 12
 
         # Generate students with their respective rates and battery levels
         students: List[Student] = [
             Student(
-                recharge_rate=random.uniform(1, 5),
-                discharge_rate=random.uniform(1, 5),
+                recharge_rate=random.uniform(25, 50),
+                discharge_rate=random.uniform(20, 35),
                 initial_battery=random.uniform(10, 80),
             ) for _ in range(N)
         ]
