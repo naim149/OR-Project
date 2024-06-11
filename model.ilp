@@ -1,0 +1,16 @@
+\ Model laptop_charging_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Minimize
+ 
+Subject To
+ R0: B[0,0] = 6.027633760716439
+ R1: - 20 Y[0,0] - B[0,0] + B[0,1] = -5
+ R2: - 20 Y[0,1] - B[0,1] + B[0,2] = -5
+ R3: Y[0,0] <= 0
+ R4: Y[0,1] <= 0
+Bounds
+ B[0,0] free
+ B[0,1] free
+Binaries
+ Y[0,0] Y[0,1]
+End
