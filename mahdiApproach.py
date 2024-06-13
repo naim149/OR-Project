@@ -1,92 +1,95 @@
 import gurobipy as gp
 from gurobipy import GRB
-import pandas as pd
+import numpy as np
+import time
+import math
 
-# Define your parameters
-N = 2  # Number of students
-s = 1   # Number of sockets
-T = 10  # Total available time
-r_i = [5 for _ in range(N)]  # Recharge rates
-d_i = [10 for _ in range(N)]  # Discharge rates
-b_i = [50 for _ in range(N)]  # Initial battery levels
+# Parameters
+N = 5  # Total number of students
+s = 1  # Total number of electrical sockets (reduced to 8)
+T = 12  # Total available time slots in hours
+delta_T = 1  # Time period for charging/discharging in hours
 
-# Calculate delta_t
-def calculate_compatible_delta_t(max_rate: float, total_time: int) -> float:
-    delta_t = 1 / max_rate
-    ratio = int(total_time / delta_t)
-    delta_t = total_time / (ratio + 1)
-    return delta_t
+batteryOffset = 1000  # Time period for charging/discharging in hours
 
-max_rate = max(max(r_i), max(d_i))
-delta_t = calculate_compatible_delta_t(max_rate, T)
+# Generate random rates and initial battery levels
+np.random.seed(0)
+r = np.random.randint(10, 20, N)  # Recharge rates (units per hour)
+d = np.random.randint(5, 10, N)  # Discharge rates (units per hour)
+b0 = np.random.uniform(5, 15, N)  # Initial battery levels
 
-a = T/delta_t
-# Create a new model
-model = gp.Model("Maximize_Student_Satisfaction")
-
-# Define variables
-X = model.addVars(N, int(T // delta_t), vtype=GRB.BINARY, name="X")
-
-# Define the objective function
-model.setObjective(
-    gp.quicksum(
-        b_i[i] + gp.quicksum(X[i, j] * (r_i[i] + d_i[i]) for j in range(int(T // delta_t))) - int(T // delta_t) * d_i[i] 
-        + gp.quicksum(X[i, j] for j in range(int(T // delta_t))) * delta_t 
-        for i in range(N)
-    ),
-    GRB.MAXIMIZE)
-
-# Add the total time constraint
-model.addConstr(
-    gp.quicksum(X[i, j] * delta_t for i in range(N) for j in range(int(T // delta_t))) <= s * T,
-    "TotalSocketTime")
-
-# Add the total time constraint
-for j in range(int(T // delta_t)):
-   model.addConstr(
-    gp.quicksum(X[i, j] * delta_t  for i in range(N)) <= s,
-    "Total Sockets")
-
-# Add the binary constraints
 for i in range(N):
-    for j in range(int(T // delta_t)):
-        model.addConstr(X[i, j] <= 1, f"BinaryConstr_{i}_{j}")
-        model.addConstr(X[i, j] >= 0, f"BinaryConstr_{i}_{j}")
+    b0[i] += batteryOffset
+
+# Calculate the number of time slots
+num_time_slots = math.ceil(T / delta_T)
+
+# Create a new model
+m = gp.Model("laptop_charging")
+
+# Decision variables
+Y = m.addVars(N, num_time_slots, vtype=GRB.BINARY, name="Y")  # Socket usage
+Z = m.addVar(vtype=GRB.CONTINUOUS, name='min_battery')  # Minimum battery level
+B = m.addVars(N, num_time_slots + 1,ub= batteryOffset+100, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
+
+# Initial battery levels
+for i in range(N):
+    m.addConstr(B[i, 0] == b0[i], name=f"init_battery_{i}")
+
+# Ensure minimum battery level Z and upper bound on battery levels
+for i in range(N):
+    for t in range(num_time_slots + 1):
+        m.addConstr(Z <= (B[i, t]), name=f"min_battery_{i}_{t}")
+
+# Ensure minimum battery level Z and upper bound on battery levels
+# for i in range(N):
+    # m.addConstr(gp.quicksum( B[i, t]  for t in range(num_time_slots))/num_time_slots >=Z , name=f"sum_battery_{i}")
+    # for t in range(num_time_slots + 1):
+        # m.addConstr(B[i, t] <= batteryOffset+100, name=f"max_battery_{i}_{t}")  # Upper bound constraint
+        # m.addConstr(B[i, t] >= batteryOffset, name=f"min_battery_{i}_{t}")  # Lower bound constraint
+
+# Battery dynamics and operational status
+for t in range(num_time_slots):
+    for i in range(N):
+        m.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_T - d[i] * delta_T, name=f"battery_dynamics_{i}_{t}")
+
+# Socket availability constraint
+for t in range(num_time_slots):
+    m.addConstr(gp.quicksum(Y[i, t] for i in range(N)) <= s, name=f"socket_avail_{t}")
+
+# Set the objective to maximize the minimum battery level
+m.setObjective(Z, GRB.MAXIMIZE)
 
 # Optimize the model
-model.optimize()
+start = time.time()
+m.optimize()
+end = time.time()
 
-# Print the results in a table format
-if model.status == GRB.OPTIMAL:
-    print("Optimal Solution Found:")
-    
-    # Create a DataFrame to display the results
-    data = []
-    for i in range(N):
-        row = []
-        for j in range(int(T // delta_t)):
-            row.append('Connected' if X[i, j].X == 1 else 'Not Connected')
-        data.append(row)
-    
-    df = pd.DataFrame(data, columns=[f'Time Interval {j}' for j in range(int(T // delta_t))],
-                      index=[f'Student {i}' for i in range(N)])
-    print(df)
-    print("Total Satisfaction:", model.objVal)
-    
-    # Calculate the matrix B
-    B = [[0 for _ in range(int(T // delta_t) + 1)] for _ in range(N)]
-    for i in range(N):
-        B[i][0] = b_i[i]
-        for j in range(int(T // delta_t)):
-            if X[i, j].X == 1:
-                B[i][j+1] = min(100, B[i][j] + (r_i[i] + d_i[i]) * delta_t - d_i[i] * delta_t)
-            else:
-                B[i][j+1] = max(0, B[i][j] - d_i[i] * delta_t)
-
-    # Print the matrix B
-    B_df = pd.DataFrame(B, columns=[f'Time {t}' for t in range(int(T // delta_t) + 1)],
-                        index=[f'Student {i}' for i in range(N)])
-    print("Battery Levels (B matrix):")
-    print(B_df)
+# Print results
+if m.status == GRB.INFEASIBLE:
+    print("The model is infeasible; computing IIS...")
+    m.computeIIS()
+    m.write("model.ilp")
+    print("IIS written to file 'model.ilp'")
+elif m.status == GRB.UNBOUNDED:
+    print("The model is unbounded.")
 else:
-    print("No Optimal Solution Found")
+    # Print results if the model is feasible
+    if m.status == GRB.OPTIMAL:
+        # Print the matrix B (battery levels)
+        print("Matrix B (Battery Levels):")
+        for i in range(N):
+            print(f"Student {i}:", [B[i, t].X for t in range(num_time_slots + 1)])
+
+        # Print the matrix Y (socket usage)
+        print("\nMatrix Y (Socket Usage):")
+        for i in range(N):
+            print(f"Student {i}:", [round(Y[i, t].X) for t in range(num_time_slots)])
+
+        # Print the minimum battery level
+        print("\nMinimum Battery Level (Z):")
+        print(f"Minimum Battery Level: {Z.X}")
+    else:
+        print("No optimal solution found.")
+
+print(f"Optimization time: {end - start} seconds")
