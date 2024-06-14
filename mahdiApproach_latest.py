@@ -5,11 +5,10 @@ import time
 import math
 
 # Parameters
-N = 5  # Total number of students
-s = 1  # Total number of electrical sockets (reduced to 8)
+N = 6  # Total number of students
+s = 1  # Total number of electrical sockets
 T = 12  # Total available time slots in hours
 delta_T = 1  # Time period for charging/discharging in hours
-
 batteryOffset = 0  # Time period for charging/discharging in hours
 
 # Generate random rates and initial battery levels
@@ -29,8 +28,9 @@ m = gp.Model("laptop_charging")
 
 # Decision variables
 Y = m.addVars(N, num_time_slots, vtype=GRB.BINARY, name="Y")  # Socket usage
+U = m.addVars(N, num_time_slots, vtype=GRB.BINARY, name="U")  # Laptop usage
 Z = m.addVar(vtype=GRB.CONTINUOUS, name='min_battery')  # Minimum battery level
-B = m.addVars(N, num_time_slots + 1,ub= batteryOffset+100, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
+B = m.addVars(N, num_time_slots + 1, ub=batteryOffset + 100, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
 
 # Initial battery levels
 for i in range(N):
@@ -38,20 +38,18 @@ for i in range(N):
 
 # Ensure minimum battery level Z and upper bound on battery levels
 for i in range(N):
-    for t in range(num_time_slots + 1):
-        m.addConstr(Z <= (B[i, t]), name=f"min_battery_{i}_{t}")
+    m.addConstr(gp.quicksum( U[i, t]  for t in range(num_time_slots))>=Z , name=f"sum of usage {i}")
 
-# Ensure minimum battery level Z and upper bound on battery levels
-# for i in range(N):
-    # m.addConstr(gp.quicksum( B[i, t]  for t in range(num_time_slots))/num_time_slots >=Z , name=f"sum_battery_{i}")
-    # for t in range(num_time_slots + 1):
-        # m.addConstr(B[i, t] <= batteryOffset+100, name=f"max_battery_{i}_{t}")  # Upper bound constraint
-        # m.addConstr(B[i, t] >= batteryOffset, name=f"min_battery_{i}_{t}")  # Lower bound constraint
+# Ensure battery levels are within bounds
+for i in range(N):
+    for t in range(num_time_slots + 1):
+        m.addConstr(B[i, t] <= batteryOffset + 100, name=f"max_battery_{i}_{t}")  # Upper bound constraint
+        m.addConstr(B[i, t] >= batteryOffset, name=f"min_battery_{i}_{t}")  # Lower bound constraint
 
 # Battery dynamics and operational status
 for t in range(num_time_slots):
     for i in range(N):
-        m.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_T - d[i] * delta_T, name=f"battery_dynamics_{i}_{t}")
+        m.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_T - U[i, t] * d[i] * delta_T, name=f"battery_dynamics_{i}_{t}")
 
 # Socket availability constraint
 for t in range(num_time_slots):
@@ -85,6 +83,11 @@ else:
         print("\nMatrix Y (Socket Usage):")
         for i in range(N):
             print(f"Student {i}:", [round(Y[i, t].X) for t in range(num_time_slots)])
+
+        # Print the matrix U (laptop usage)
+        print("\nMatrix U (Laptop Usage):")
+        for i in range(N):
+            print(f"Student {i}:", [round(U[i, t].X) for t in range(num_time_slots)])
 
         # Print the minimum battery level
         print("\nMinimum Battery Level (Z):")
