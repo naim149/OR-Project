@@ -58,11 +58,13 @@ class GurobiOptimization:
         if model.status == GRB.OPTIMAL:
             U_matrix = [[round(U[i, t].X) for t in range(num_time_slots)] for i in range(num_students)]
             Y_matrix = [[round(Y[i, t].X) for t in range(num_time_slots)] for i in range(num_students)]
+            B_matrix = [[round(B[i, t].X) for t in range(num_time_slots + 1)] for i in range(num_students)]
 
             result = {
                 'min_usage_time': Z.X,
                 'U': U_matrix,
                 'Y': Y_matrix,
+                'B': B_matrix,
                 'model_build_time': model_build_end_time - model_build_start_time,
                 'optimization_time': optimization_end_time - optimization_start_time,
                 'status': 'optimal'
@@ -73,6 +75,7 @@ class GurobiOptimization:
                 'min_usage_time': None,
                 'U': None,
                 'Y': None,
+                'B': None,
                 'model_build_time': model_build_end_time - model_build_start_time,
                 'optimization_time': optimization_end_time - optimization_start_time,
                 'status': 'not_optimal'

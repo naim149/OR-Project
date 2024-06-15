@@ -8,11 +8,6 @@ class OptimizationInstance:
         self.total_time: float = total_time
         self.delta_t: float = delta_t
 
-        # Adjust rates by delta_t
-        for student in self.students:
-            student.recharge_rate *= self.delta_t
-            student.discharge_rate *= self.delta_t
-
     def __repr__(self) -> str:
         return (f"OptimizationInstance(num_sockets={self.num_sockets}, total_time={self.total_time}, "
                 f"delta_t={self.delta_t}, students={self.students})")
