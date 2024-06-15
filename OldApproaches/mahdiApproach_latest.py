@@ -6,31 +6,50 @@ import math
 
 # Parameters
 N = 6  # Total number of students
-s = 1  # Total number of electrical sockets
-T = 12  # Total available time slots in hours
+s = 3  # Total number of electrical sockets
+T = 10  # Total available time slots in hours
 delta_T = 1  # Time period for charging/discharging in hours
 batteryOffset = 0  # Time period for charging/discharging in hours
 
-# Generate random rates and initial battery levels
-np.random.seed(0)
-r = np.random.randint(10, 20, N)  # Recharge rates (units per hour)
-d = np.random.randint(5, 10, N)  # Discharge rates (units per hour)
-b0 = np.random.uniform(5, 15, N)  # Initial battery levels
+# Generate random data for each student's battery capacity, recharge, and discharge rates
+battery_capacity_mean, battery_capacity_std = 60, 10
+battery_capacities = np.random.normal(battery_capacity_mean, battery_capacity_std, N)
 
-for i in range(N):
-    b0[i] += batteryOffset
+r_watts_mean, r_watts_std = 37.5, 5
+r_watts = np.random.normal(r_watts_mean, r_watts_std, N)
+
+d_watts_mean, d_watts_std = 10, 2
+d_watts = np.random.normal(d_watts_mean, d_watts_std, N)
+
+# Conversion to battery percentage per hour based on individual battery capacities
+r = (r_watts / battery_capacities) * 100
+d = (d_watts / battery_capacities) * 100
+
+# Initial battery levels in percentage
+b0 = np.random.uniform(5, 15, N)
+
+# Ensure values are within acceptable ranges
+r_min, r_max = (30 / battery_capacity_mean) * 100, (45 / battery_capacity_mean) * 100
+d_min, d_max = (5 / battery_capacity_mean) * 100, (15 / battery_capacity_mean) * 100
+
+r = np.clip(r, r_min, r_max)
+d = np.clip(d, d_min, d_max)
+
+print("Battery capacities (Wh):", battery_capacities)
+print("Recharge rates (r) in percentage per hour:", r)
+print("Discharge rates (d) in percentage per hour:", d)
+print("Initial battery levels (b0):", b0)
 
 # Calculate the number of time slots
 num_time_slots = math.ceil(T / delta_T)
-
 # Create a new model
 m = gp.Model("laptop_charging")
 
 # Decision variables
 Y = m.addVars(N, num_time_slots, vtype=GRB.BINARY, name="Y")  # Socket usage
 U = m.addVars(N, num_time_slots, vtype=GRB.BINARY, name="U")  # Laptop usage
-Z = m.addVar(vtype=GRB.CONTINUOUS, name='min_battery')  # Minimum battery level
-B = m.addVars(N, num_time_slots + 1, ub=batteryOffset + 100, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
+Z = m.addVar(vtype=GRB.INTEGER, name='min_battery')  # Minimum battery level
+B = m.addVars(N, num_time_slots + 1, ub=100, vtype=GRB.CONTINUOUS, name="B")  # Battery levels
 
 # Initial battery levels
 for i in range(N):
@@ -43,17 +62,17 @@ for i in range(N):
 # Ensure battery levels are within bounds
 for i in range(N):
     for t in range(num_time_slots + 1):
-        m.addConstr(B[i, t] <= batteryOffset + 100, name=f"max_battery_{i}_{t}")  # Upper bound constraint
-        m.addConstr(B[i, t] >= batteryOffset, name=f"min_battery_{i}_{t}")  # Lower bound constraint
+        m.addConstr(B[i, t] <= 100, name=f"max_battery_{i}_{t}")  # Upper bound constraint
+        m.addConstr(B[i, t] >= 0, name=f"min_battery_{i}_{t}")  # Lower bound constraint
 
 # Battery dynamics and operational status
 for t in range(num_time_slots):
     for i in range(N):
-        m.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_T - U[i, t] * d[i] * delta_T, name=f"battery_dynamics_{i}_{t}")
+        m.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_T +  Y[i, t] * U[i, t] * d[i] * delta_T - U[i, t] * d[i] * delta_T, name=f"battery_dynamics_{i}_{t}")
 
 # Socket availability constraint
 for t in range(num_time_slots):
-    m.addConstr(gp.quicksum(Y[i, t] for i in range(N)) <= s, name=f"socket_avail_{t}")
+    m.addConstr(gp.quicksum((Y[i, t] for i in range(N)) ) <= s, name=f"socket_avail_{t}")
 
 # Set the objective to maximize the minimum battery level
 m.setObjective(Z, GRB.MAXIMIZE)
@@ -90,8 +109,7 @@ else:
             print(f"Student {i}:", [round(U[i, t].X) for t in range(num_time_slots)])
 
         # Print the minimum battery level
-        print("\nMinimum Battery Level (Z):")
-        print(f"Minimum Battery Level: {Z.X}")
+        print(f"Minimum Usage Times: {Z.X} of {num_time_slots}")
     else:
         print("No optimal solution found.")
 
