@@ -18,7 +18,7 @@ class OptimizationManager:
     def print_results(self, results, optimization_instance: OptimizationInstance):
         self.print_parameters(optimization_instance)
         for name, result in results:
-            self.print_algorithm_results(name, result)
+            self.print_algorithm_results(name, result,optimization_instance)
 
     def print_parameters(self, optimization_instance: OptimizationInstance):
         print(f"Number of students: {len(optimization_instance.students)}")
@@ -27,10 +27,11 @@ class OptimizationManager:
         print(f"Delta time (ΔT): {optimization_instance.delta_t}")
         print("\n")
 
-    def print_algorithm_results(self, name: str, result: Dict):
+    def print_algorithm_results(self, name: str, result: Dict,optimization_instance: OptimizationInstance):
         print(f"Algorithm: {name}")
         if result['status'] == 'optimal':
             print(f"Minimum Usage Time: {result['min_usage_time']}")
+            print(f"Percentage {result['min_usage_time']*optimization_instance.delta_t*100/optimization_instance.total_time}%")
             print(f"Optimization Time: {result['optimization_time']} seconds")
             print(f"Model Build Time: {result['model_build_time']} seconds")
             self.print_matrix(result)

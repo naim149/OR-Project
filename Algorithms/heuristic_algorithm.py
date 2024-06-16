@@ -34,9 +34,8 @@ class HeuristicOptimization:
 
         return sockets_allocated
 
-    def distribute_remaining_sockets(self, forecasted_battery_levels, Y_matrix, U_matrix, num_sockets, t):
+    def distribute_remaining_sockets(self, forecasted_battery_levels, Y_matrix, U_matrix, num_remaining_sockets, t):
         students_without_sockets = np.where(Y_matrix[:, t] == 0)[0]
-        num_remaining_sockets = num_sockets - np.sum(Y_matrix[:, t])
 
         if num_remaining_sockets > 0:
             sorted_students = sorted(students_without_sockets, key=lambda i: forecasted_battery_levels[i])

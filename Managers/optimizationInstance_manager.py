@@ -16,7 +16,7 @@ class OptimizationInstanceManager:
     def create_instance(N: int, s: int, T: int, delta_t: float) -> OptimizationInstance:
         """Create and return an instance of the optimization problem."""
         # Ensure number of sockets is significantly less than number of students
-        assert s < N, "Number of sockets should be less than the number of students"
+        assert s <= N, "Number of sockets should be less than the number of students"
         
         # # Generate random data for each student's battery capacity, recharge, and discharge rates
         # battery_capacity_mean, battery_capacity_std = 60, 10

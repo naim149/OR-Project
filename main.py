@@ -4,11 +4,11 @@ from Algorithms.gurobi_algorithm import GurobiOptimization
 from Algorithms.heuristic_algorithm import HeuristicOptimization
 
 def main():
-    manager = OptimizationInstanceManager(1)
+    manager = OptimizationInstanceManager()
     # Assuming N, s, T, and delta_T are given or dynamically decided in the main function
-    N = 12
-    s = 6
-    T = 5
+    N = 15
+    s = 7
+    T = 3
     delta_T = 1
 
     optimization_instance = manager.create_instance(N, s, T, delta_T)
