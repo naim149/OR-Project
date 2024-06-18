@@ -14,7 +14,7 @@ class OptimizationManager:
             results.append((algorithm.name, result))
             print("\n")
         self.print_results(results, optimization_instance)
-        return results;
+        return results
 
     def print_results(self, results, optimization_instance: OptimizationInstance):
         self.print_parameters(optimization_instance)
