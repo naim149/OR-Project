@@ -6,14 +6,14 @@ from Algorithms.heuristic_algorithm import HeuristicOptimization
 def main():
     manager = OptimizationInstanceManager(1)
     # Assuming N, s, T, and delta_T are given or dynamically decided in the main function
-    N = 100000
-    s = 33000
+    N = 10
+    s = 3
     T = 16
     delta_T = 0.5
 
     optimization_instance = manager.create_instance(N, s, T, delta_T)
     algorithms = []
-    # algorithms.append(GurobiOptimization())
+    algorithms.append(GurobiOptimization())
     algorithms.append(HeuristicOptimization())
 
     optimization_manager = OptimizationManager(algorithms)

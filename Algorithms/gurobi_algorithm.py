@@ -24,7 +24,8 @@ class GurobiOptimization:
 
         model_build_start_time = time.time()
         model = gp.Model("laptop_charging")
-
+        model.Params.OutputFlag=0
+        model.Params.LogToConsole=0
         Y = model.addVars(num_students, num_time_slots, vtype=GRB.BINARY, name="Y")
         U = model.addVars(num_students, num_time_slots, vtype=GRB.BINARY, name="U")
         Z = model.addVar(vtype=GRB.INTEGER, name='min_battery')

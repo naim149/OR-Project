@@ -1,0 +1,2 @@
+N,s,heuristic_min_usage_time,heuristic_optimization_time,gurobi_min_usage_time,gurobi_optimization_time,gurobi_model_build_time
+81,29,32.0,0.00824887752532959,32.0,3.2443771362304688,0.18533904552459718
