@@ -7,6 +7,7 @@ from Managers.optimizationInstance_manager import OptimizationInstanceManager
 from Managers.optimization_manager import OptimizationManager
 from Algorithms.heuristic_algorithm import HeuristicOptimization
 from Algorithms.gurobi_algorithm import GurobiOptimization  # Assuming GurobiOptimization is implemented similarly
+from Algorithms.gurobi_iterative import GurobiIterativeOptimization
 
 def initialize_instance(seed, N, s, T, delta_T):
     random.seed(seed)
@@ -36,15 +37,15 @@ def write_results_to_csv(algorithm_name, B, U, Y, T, delta_T, N, s, filename):
 
 def main():
     # Fixed parameters
-    seed = 0
-    N = 4
-    s = 1
-    T = 8
+    seed = 1
+    N = 6
+    s = 2
+    T = 4
     delta_T = 0.5
 
     algorithms = [
-        HeuristicOptimization(),
-        # GurobiOptimization()
+        GurobiOptimization(),
+        GurobiIterativeOptimization(),
     ]
 
     optimization_instance = initialize_instance(seed, N, s, T, delta_T)
