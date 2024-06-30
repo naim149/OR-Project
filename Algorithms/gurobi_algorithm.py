@@ -30,6 +30,7 @@ class GurobiOptimization:
         U = model.addVars(num_students, num_time_slots, vtype=GRB.BINARY, name="U")
         Z = model.addVar(vtype=GRB.INTEGER, name='min_usage_time')
         B = model.addVars(num_students, num_time_slots + 1, lb=0, ub=100, vtype=GRB.CONTINUOUS, name="B")
+        A = model.addVar(vtype=GRB.CONTINUOUS, name='average_usage_time')
 
         if initial_guesses:
             for i in range(num_students):
@@ -53,7 +54,9 @@ class GurobiOptimization:
         for t in range(num_time_slots):
             model.addConstr(gp.quicksum(Y[i, t] for i in range(num_students)) <= optimization_instance.num_sockets, name=f"socket_avail_{t}")
 
-        model.setObjective(Z, GRB.MAXIMIZE)
+        model.addConstr(gp.quicksum((U[i, t] / (num_students * num_time_slots)) for t in range(num_time_slots) for i in range(num_students)) == A, name=f"average_usage")
+
+        model.setObjective(Z + A, GRB.MAXIMIZE)
         model_build_end_time = time.time()
 
         optimization_start_time = time.time()
@@ -66,7 +69,9 @@ class GurobiOptimization:
             B_matrix = [[round(B[i, t].X) for t in range(num_time_slots + 1)] for i in range(num_students)]
 
             result = {
+                'fair_maximized_usage_score': Z.X + A.X,
                 'min_usage_time': Z.X,
+                'A': A.X,
                 'U': U_matrix,
                 'Y': Y_matrix,
                 'B': B_matrix,
@@ -77,7 +82,7 @@ class GurobiOptimization:
             return result
         else:
             result = {
-                'min_usage_time': None,
+                'fair_maximized_usage_score': None,
                 'U': None,
                 'Y': None,
                 'B': None,

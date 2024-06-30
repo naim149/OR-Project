@@ -6,14 +6,13 @@ from Managers.optimizationInstance_manager import OptimizationInstanceManager
 from Managers.optimization_manager import OptimizationManager
 from Algorithms.heuristic_algorithm import HeuristicOptimization  
 from Algorithms.gurobi_algorithm import GurobiOptimization  
-from Algorithms.gurobi_algorithm_enhanced import GurobiOptimizationEnhanced
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
 # Flags
-remove_axis_numbering = True
-hide_values_in_table = True
+remove_axis_numbering = False
+hide_values_in_table = False
 
 def initialize_instance(seed, N, s, T, delta_T):
     random.seed(seed)
@@ -71,15 +70,14 @@ def create_colored_heatmap(ax, B, U, Y, T, delta_T, N, s, algorithm_name):
 def main():
     # Fixed parameters
     seed = 1
-    N = 200
-    s = 52
-    T = 16
-    delta_T = 0.5
+    N = 5
+    s = 1
+    T = 8
+    delta_T = 1
 
     algorithms = []
     algorithms.append(HeuristicOptimization())
-    # algorithms.append(GurobiOptimization())
-    # algorithms.append(GurobiOptimizationEnhanced())
+    algorithms.append(GurobiOptimization())
 
     if not os.path.exists('Allocations Results'):
         os.makedirs('Allocations Results')

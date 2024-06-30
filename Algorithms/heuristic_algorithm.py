@@ -34,7 +34,7 @@ class HeuristicOptimization:
 
         return sockets_allocated
 
-    def distribute_remaining_sockets(self, forecasted_battery_levels, Y_matrix, U_matrix, num_remaining_sockets,r,d, t,delta_t):
+    def distribute_remaining_sockets(self, forecasted_battery_levels, Y_matrix, U_matrix, num_remaining_sockets, r, d, t, delta_t):
         students_without_sockets = np.where(Y_matrix[:, t] == 0)[0]
 
         if num_remaining_sockets > 0:
@@ -76,12 +76,15 @@ class HeuristicOptimization:
 
             remaining_sockets = num_sockets - np.sum(Y_matrix[:, t])
             if remaining_sockets > 0:
-                self.distribute_remaining_sockets(forecasted_battery_levels, Y_matrix, U_matrix, remaining_sockets,r,d,t, delta_t)
+                self.distribute_remaining_sockets(forecasted_battery_levels, Y_matrix, U_matrix, remaining_sockets, r, d, t, delta_t)
 
         end_time = time.time()
-
+        A = (np.sum(U_matrix) / (num_time_slots * num_students))
+        Z = np.min(np.sum(U_matrix, axis=1))
         result = {
-            'min_usage_time': np.min(np.sum(U_matrix, axis=1)),
+            'fair_maximized_usage_score': ( A+ Z),
+            'min_usage_time': Z,
+            'A': A,
             'U': U_matrix.tolist(),
             'Y': Y_matrix.tolist(),
             'B': B_matrix[:, :-1].tolist(),  # excluding the last time slot for battery levels
