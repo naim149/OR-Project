@@ -3,7 +3,6 @@ import csv
 import random
 from datetime import datetime
 from Managers.optimizationInstance_manager import OptimizationInstanceManager
-from Managers.optimization_manager import OptimizationManager
 from Algorithms.heuristic_algorithm import HeuristicOptimization
 from Algorithms.gurobi_algorithm import GurobiOptimization
 import numpy as np
@@ -16,7 +15,7 @@ def main():
     results = []
 
     # Define ranges and step sizes
-    ranges = [ (150, 201, 50)] #, (150, 201, 50) (1, 16, 1),
+    ranges = [ (1, 10, 1), (10, 101, 10)] 
 
     optimal_s = 1  # Start with the minimum possible value of s
 
@@ -84,7 +83,7 @@ def main():
 
     # Get the current time for the filename
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f'comparison_results_{current_time}.csv'
+    filename = f'Gurobi vs Heuristic Comparison Results\\comparison_results_{current_time}.csv'
 
     # Write results to CSV file
     with open(filename, mode='w', newline='') as file:

@@ -1,6 +1,7 @@
 import time
 import csv
 import random
+from datetime import datetime
 from Managers.optimizationInstance_manager import OptimizationInstanceManager
 from Managers.optimization_manager import OptimizationManager
 from Algorithms.heuristic_algorithm import HeuristicOptimization
@@ -10,9 +11,10 @@ def main():
     T = 16
     delta_T = 0.5
     results = []
+    algorithms = [HeuristicOptimization()]
 
     # Define ranges and step sizes
-    ranges = [(1, 101, 1), (100, 1001, 10), (1000, 10001, 100)]
+    ranges = [(1, 101, 1),(100, 1001, 10), (1000, 10001, 100)]
     
     optimal_s = 1  # Start with the minimum possible value of s
 
@@ -27,7 +29,6 @@ def main():
                     random.seed(seed)
                     manager = OptimizationInstanceManager(seed)
                     optimization_instance = manager.create_instance(N, s, T, delta_T)
-                    algorithms = [HeuristicOptimization()]
                     optimization_manager = OptimizationManager(algorithms)
                     
                     start_time = time.time()
@@ -54,7 +55,8 @@ def main():
                 print(f"No optimal s found for N = {N}")
 
     # Write results to CSV file
-    with open('results.csv', mode='w', newline='') as file:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(f'N vs s Results\\results_{timestamp}.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['N', 's', 'Execution Times'])
         for result in results:
