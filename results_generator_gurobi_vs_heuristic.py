@@ -14,7 +14,7 @@ def main():
     delta_T = 0.5
     num_time_slots = math.ceil(T / delta_T)
 
-    N_values = [5]  # Define the range of N values to investigate
+    N_values = [9,10,11]  # Define the range of N values to investigate
     
     for N in N_values:
         results = []

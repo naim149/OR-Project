@@ -5,9 +5,9 @@ from Algorithms.heuristic_algorithm import HeuristicOptimization
 from Algorithms.gurobi_hybrid import GurobiHybridOptimization
 
 def main():
-    manager = OptimizationInstanceManager(8)
-    N = 5
-    s = 2
+    manager = OptimizationInstanceManager(4)
+    N = 9
+    s = 3
     T = 16
     delta_T = 0.5
 
@@ -22,4 +22,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-33333
