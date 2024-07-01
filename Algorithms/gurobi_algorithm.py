@@ -24,6 +24,9 @@ class GurobiOptimization:
 
         model_build_start_time = time.time()
         model = gp.Model("laptop_charging")
+        # Set the acceptable optimality gap (e.g., 0.0001 for 99.99% optimality)
+        model.setParam('MIPGap', 0.001)
+
         model.Params.OutputFlag = 0
         model.Params.LogToConsole = 0
         Y = model.addVars(num_students, num_time_slots, vtype=GRB.BINARY, name="Y")
@@ -55,6 +58,10 @@ class GurobiOptimization:
             model.addConstr(gp.quicksum(Y[i, t] for i in range(num_students)) <= optimization_instance.num_sockets, name=f"socket_avail_{t}")
 
         model.addConstr(gp.quicksum((U[i, t] / (num_students * num_time_slots)) for t in range(num_time_slots) for i in range(num_students)) == A, name=f"average_usage")
+
+        for t in range(num_time_slots):
+            for i in range(num_students):
+                model.addConstr(U[i, t] >= Y[i, t])
 
         model.setObjective(Z + A, GRB.MAXIMIZE)
         model_build_end_time = time.time()

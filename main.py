@@ -5,10 +5,10 @@ from Algorithms.heuristic_algorithm import HeuristicOptimization
 from Algorithms.gurobi_hybrid import GurobiHybridOptimization
 
 def main():
-    manager = OptimizationInstanceManager(3)
-    N = 6
-    s = 0
-    T = 4
+    manager = OptimizationInstanceManager(8)
+    N = 5
+    s = 2
+    T = 16
     delta_T = 0.5
 
     optimization_instance = manager.create_instance(N, s, T, delta_T)

@@ -11,8 +11,8 @@ import seaborn as sns
 import os
 
 # Flags
-remove_axis_numbering = False
-hide_values_in_table = False
+remove_axis_numbering = True
+hide_values_in_table = True
 
 def initialize_instance(seed, N, s, T, delta_T):
     random.seed(seed)
@@ -70,13 +70,13 @@ def create_colored_heatmap(ax, B, U, Y, T, delta_T, N, s, algorithm_name):
 def main():
     # Fixed parameters
     seed = 1
-    N = 5
-    s = 1
-    T = 8
-    delta_T = 1
+    N = 20
+    s = 6
+    T = 16
+    delta_T = 0.5
 
     algorithms = []
-    algorithms.append(HeuristicOptimization())
+    # algorithms.append(HeuristicOptimization())
     algorithms.append(GurobiOptimization())
 
     if not os.path.exists('Allocations Results'):

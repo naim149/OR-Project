@@ -10,14 +10,17 @@ import math
 
 def main():
     # Fixed parameters
-    T = 4
-    delta_T = 1
-    N_values = [15]  # Define the range of N values to investigate
+    T = 16
+    delta_T = 0.5
+    num_time_slots = math.ceil(T / delta_T)
 
+    N_values = [5]  # Define the range of N values to investigate
+    
     for N in N_values:
         results = []
-
+        print(f" Generating for Number of students: {N}")
         for s in range(1, N + 1):
+            print(f" Generating for sockets: {s}")
             optimal = True
             heuristic_u_scores = []
             heuristic_optimization_times = []
@@ -28,17 +31,18 @@ def main():
             gurobi_min_usage_times = []
 
             for seed in range(10):
-                random.seed(seed)
+                print(f" Generating for seed: {seed}")
                 manager = OptimizationInstanceManager(seed)
                 optimization_instance = manager.create_instance(N, s, T, delta_T)
 
                 # Heuristic Optimization
+                print(f" Started Heuristic")
                 heuristic = HeuristicOptimization()
                 start_time = time.time()
                 heuristic_result = heuristic.optimize_allocation(optimization_instance)
                 heuristic_optimization_time = time.time() - start_time
 
-                if heuristic_result['fair_maximized_usage_score'] < 1 + (T / delta_T):
+                if heuristic_result['fair_maximized_usage_score'] < 1 + (num_time_slots):
                     optimal = False
 
                 heuristic_u_scores.append(heuristic_result['A'])
@@ -46,13 +50,14 @@ def main():
                 heuristic_min_usage_times.append(heuristic_result['min_usage_time'])
 
                 # Gurobi Optimization
+                print(f" Started Gurobi")
                 gurobi = GurobiOptimization()
                 start_time = time.time()
                 gurobi_result = gurobi.optimize_allocation(optimization_instance)
                 gurobi_optimization_time = time.time() - start_time
                 gurobi_model_build_time = gurobi_result.get('model_build_time', 0)
 
-                if gurobi_result['fair_maximized_usage_score'] < 1 + (T / delta_T):
+                if gurobi_result['fair_maximized_usage_score'] < 1 + (num_time_slots):
                     optimal = False
 
                 gurobi_u_scores.append(gurobi_result['A'])
@@ -74,13 +79,15 @@ def main():
                 })
 
             if optimal:
-                break
+               print(f" Optimal was found for socket: {s}")
+               break
 
         # Get the current time for the filename
         current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f'Gurobi vs Heuristic Comparison Results\\gurobi_vs_heuristic_N_{N}_{current_time}.csv'
 
         # Write results to CSV file
+        print(f" Starting Data Export")
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['Students', 'Sockets', 'Heuristic_Z', 'Heuristic_U', 'Heuristic_Optimization_Time',
