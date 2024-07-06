@@ -25,7 +25,10 @@ class GurobiOptimization:
         model_build_start_time = time.time()
         model = gp.Model("laptop_charging")
         # Set the acceptable optimality gap (e.g., 0.0001 for 99.99% optimality)
-        model.setParam('MIPGap', 0.001)
+        # model.setParam('MIPGap', 0.001)
+
+        if optimization_instance.time_limit > 0:
+            model.setParam('TimeLimit', optimization_instance.time_limit)
 
         model.Params.OutputFlag = 0
         model.Params.LogToConsole = 0
@@ -63,14 +66,14 @@ class GurobiOptimization:
             for i in range(num_students):
                 model.addConstr(U[i, t] >= Y[i, t])
 
-        model.setObjective(Z + A, GRB.MAXIMIZE)
+        model.setObjective(Z+A , GRB.MAXIMIZE)
         model_build_end_time = time.time()
 
         optimization_start_time = time.time()
         model.optimize()
         optimization_end_time = time.time()
 
-        if model.status == GRB.OPTIMAL:
+        if model.status == GRB.TIME_LIMIT or model.status == GRB.OPTIMAL:
             U_matrix = [[round(U[i, t].X) for t in range(num_time_slots)] for i in range(num_students)]
             Y_matrix = [[round(Y[i, t].X) for t in range(num_time_slots)] for i in range(num_students)]
             B_matrix = [[round(B[i, t].X) for t in range(num_time_slots + 1)] for i in range(num_students)]

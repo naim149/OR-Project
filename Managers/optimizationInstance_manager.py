@@ -13,7 +13,7 @@ class OptimizationInstanceManager:
             np.random.seed(seed)
 
     @staticmethod
-    def create_instance(N: int, s: int, T: int, delta_T: float) -> OptimizationInstance:
+    def create_instance(N: int, s: int, T: int, delta_T: float,time_limit: int = 0 ) -> OptimizationInstance:
         """Create and return an instance of the optimization problem."""
         
         recharge_rate_avg = 33.33 
@@ -34,5 +34,5 @@ class OptimizationInstanceManager:
             for recharge_rate, discharge_rate, initial_battery in zip(recharge_rates, discharge_rates, initial_battery_levels)
         ]
 
-        return OptimizationInstance(students, s, T, delta_T)
+        return OptimizationInstance(students, s, T, delta_T,time_limit)
 
