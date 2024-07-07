@@ -73,7 +73,7 @@ This script creates figures from CSV data to compare the execution times of heur
 ## Installation
 1. Clone the repository:
 ```sh
-git clone https://github.com/yourusername/your-repo.git
+git clone https://github.com/mahdi-assaf/OR_Aula_Studio-main.git
 
 ```
 2. Run the setup batch script:

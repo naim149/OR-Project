@@ -20,13 +20,13 @@ def main():
     # Fixed parameters
     seed = 0
     N = 200
-    s = 52
+    s = 65
     T = 16
     delta_T = 0.5
 
     algorithms = []
-    algorithms.append(HeuristicOptimization())
-    # algorithms.append(GurobiHybridOptimization())
+    algorithms.append(GurobiHybridOptimization())
+    # algorithms.append(HeuristicOptimization())
 
     if not os.path.exists('Allocations Results'):
         os.makedirs('Allocations Results')
