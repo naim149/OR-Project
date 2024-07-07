@@ -25,8 +25,8 @@ def main():
     delta_T = 0.5
 
     algorithms = []
-    algorithms.append(GurobiHybridOptimization())
-    algorithms.append(())
+    algorithms.append(HeuristicOptimization())
+    # algorithms.append(GurobiHybridOptimization())
 
     if not os.path.exists('Allocations Results'):
         os.makedirs('Allocations Results')
