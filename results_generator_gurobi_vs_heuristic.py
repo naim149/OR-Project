@@ -14,9 +14,10 @@ def main():
     delta_T = 0.5
     num_time_slots = math.ceil(T / delta_T)
 
-    N_values = [9,10,11]  # Define the range of N values to investigate
-    
-    for N in N_values:
+    ranges = [9]  # Define the range of N values to investigate
+    timeout = 5
+
+    for N in ranges:
         results = []
         print(f" Generating for Number of students: {N}")
         for s in range(1, N + 1):
@@ -33,7 +34,7 @@ def main():
             for seed in range(10):
                 print(f" Generating for seed: {seed}")
                 manager = OptimizationInstanceManager(seed)
-                optimization_instance = manager.create_instance(N, s, T, delta_T)
+                optimization_instance = manager.create_instance(N, s, T, delta_T,timeout)
 
                 # Heuristic Optimization
                 print(f" Started Heuristic")
