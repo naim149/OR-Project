@@ -55,7 +55,7 @@ class GurobiOptimization:
 
         for t in range(num_time_slots):
             for i in range(num_students):
-                model.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_t + Y[i, t] * U[i, t] * d[i] * delta_t - U[i, t] * d[i] * delta_t, name=f"battery_dynamics_{i}_{t}")
+                model.addConstr(B[i, t + 1] == B[i, t] + Y[i, t] * r[i] * delta_t + Y[i, t] * d[i] * delta_t - U[i, t] * d[i] * delta_t, name=f"battery_dynamics_{i}_{t}")
 
         for t in range(num_time_slots):
             model.addConstr(gp.quicksum(Y[i, t] for i in range(num_students)) <= optimization_instance.num_sockets, name=f"socket_avail_{t}")
