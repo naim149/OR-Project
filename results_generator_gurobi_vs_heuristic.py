@@ -14,8 +14,8 @@ def main():
     delta_T = 0.5
     num_time_slots = math.ceil(T / delta_T)
 
-    ranges = [9]  # Define the range of N values to investigate
-    timeout = 5
+    ranges = [40]  # Define the range of N values to investigate
+    timeout = 180
 
     for N in ranges:
         results = []
@@ -43,7 +43,7 @@ def main():
                 heuristic_result = heuristic.optimize_allocation(optimization_instance)
                 heuristic_optimization_time = time.time() - start_time
 
-                if heuristic_result['fair_maximized_usage_score'] < 1 + (num_time_slots):
+                if heuristic_result['min_usage_time'] < (num_time_slots):
                     optimal = False
 
                 heuristic_u_scores.append(heuristic_result['A'])
@@ -58,7 +58,7 @@ def main():
                 gurobi_optimization_time = time.time() - start_time
                 gurobi_model_build_time = gurobi_result.get('model_build_time', 0)
 
-                if gurobi_result['fair_maximized_usage_score'] < 1 + (num_time_slots):
+                if gurobi_result['min_usage_time'] < (num_time_slots):
                     optimal = False
 
                 gurobi_u_scores.append(gurobi_result['A'])
